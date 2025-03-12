@@ -17,6 +17,7 @@ GIT_PUSH_ARGS=${INPUT_GIT_PUSH_ARGS:-"--tags --force --prune"}
 GIT_SSH_NO_VERIFY_HOST=${INPUT_GIT_SSH_NO_VERIFY_HOST}
 GIT_SSH_KNOWN_HOSTS=${INPUT_GIT_SSH_KNOWN_HOSTS}
 HAS_CHECKED_OUT="$(git rev-parse --is-inside-work-tree 2>/dev/null || /bin/true)"
+HOME_DIR="$(realpath ~)"
 
 if [[ "${HAS_CHECKED_OUT}" != "true" ]]; then
     echo "WARNING: repo not checked out; attempting checkout" > /dev/stderr
@@ -48,7 +49,7 @@ if [[ "${GIT_SSH_PRIVATE_KEY}" != "" ]]; then
     chmod 600 ~/.ssh/id_rsa
     if [[ "${GIT_SSH_KNOWN_HOSTS}" != "" ]]; then
       echo "${GIT_SSH_KNOWN_HOSTS}" > ~/.ssh/known_hosts
-      git config --global core.sshCommand "ssh -i ~/.ssh/id_rsa -o IdentitiesOnly=yes -o UserKnownHostsFile=~/.ssh/known_hosts"
+      git config --global core.sshCommand "ssh -i ${HOME_DIR}/.ssh/id_rsa -o IdentitiesOnly=yes -o UserKnownHostsFile=${HOME_DIR}/.ssh/known_hosts"
     else
       if [[ "${GIT_SSH_NO_VERIFY_HOST}" != "true" ]]; then
         echo "WARNING: no known_hosts set and host verification is enabled (the default)"
@@ -56,7 +57,7 @@ if [[ "${GIT_SSH_PRIVATE_KEY}" != "" ]]; then
         echo "Please either provide the GIT_SSH_KNOWN_HOSTS or GIT_SSH_NO_VERIFY_HOST inputs"
         exit 1
       else
-        git config --global core.sshCommand "ssh -i ~/.ssh/id_rsa -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+        git config --global core.sshCommand "ssh -i ${HOME_DIR}/.ssh/id_rsa -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
       fi
     fi
 else
